@@ -2,7 +2,7 @@ import numpy as np
 
 from pax import plugin, datastructure
 
-from pax.dsputils import find_intervals_above_threshold
+from pax.dsputils import find_intervals_above_threshold_no_splitting
 
 import matplotlib.pyplot as plt
 
