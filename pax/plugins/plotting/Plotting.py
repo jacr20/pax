@@ -99,13 +99,19 @@ class PlotBase(plugin.OutputPlugin):
             else:
                 plt.savefig(filename + '.png')
         else:
-            plt.show(block=self.block_view)
-            if not self.block_view:
-                self.log.info("Hit enter to continue...")
-                input()
+            #filedir = os.mkdir('/home/joel/Documents/XENON-ML/Figures/' +'X1T_Dummy_Waveform')
+            filename = '/home/joel/Documents/XENON-ML/Figures/'+'/%06d_%06d' % (self.config['run_number'], event_number)
+            plt.savefig(filename + 'png') #self.log.info("Hit enter to continue...")#plt.show(block=self.block_view)
+            #if not self.block_view:
+                #for event_number in range (self.config['run_number']): #if not self.block_view:
+                    #filename = '/%06d_%06d' % (self.config['run_number'], event_number)
+                    #plt.savefig('/home/joel/Documents/XENON-ML/Figures/filename.png') #self.log.info("Hit enter to continue...")
+		
+                #input()
         plt.close()
         self.skip_counter = self.config['plot_every'] - 1
-
+        plt.xticks([])
+        plt.yticks([])
     def annotation_filter(self, event, nsamples):
 
         annotation_filter_list = self.config['annotation_filter']
@@ -173,7 +179,7 @@ class PlotBase(plugin.OutputPlugin):
 
     def plot_waveform(self, event,
                       left=0, right=None, pad=0,
-                      show_peaks=False, show_legend=True, log_y_axis=False,
+                      show_peaks=False, show_legend=True, log_y_axis=True,
                       scale=1,
                       ax=None):
         """
@@ -197,12 +203,12 @@ class PlotBase(plugin.OutputPlugin):
 
         if log_y_axis:
             ax.set_yscale('log')
-            ax.set_ylabel('Amplitude + 1 (pe/bin)')
+            #ax.set_ylabel('Amplitude + 1 (pe/bin)')
             y_offset = 1
         else:
-            ax.set_ylabel('Amplitude (pe/bin)')
+            #ax.set_ylabel('Amplitude (pe/bin)')
             y_offset = 0
-        ax.set_xlabel('Time (us)')
+        #ax.set_xlabel('Time (us)')
 
         y_min = 1
         y_max = 0
@@ -214,12 +220,16 @@ class PlotBase(plugin.OutputPlugin):
             y_max = max(y_max, np.max(wv))
             ax.plot(xvalues,
                     wv,
-                    label=w['plot_label'],
+                    #label=w['plot_label'],
                     color=w.get('color', 'gray'),
                     drawstyle=w.get('drawstyle'),
                     alpha=w.get('alpha', 1))
+            #ax.set_ylim(0,6*10**3)
+            #ax.set_xlim(0,1350)
         if log_y_axis:
             ax.set_ylim((0.9, plt.ylim()[1]))
+            #ax.set_ylim(0,6*10**3)
+            #ax.set_xlim(0,1350)
 
         self.draw_trigger_signals(event, y=1 if log_y_axis else 0, ax=ax)
 
@@ -255,21 +265,23 @@ class PlotBase(plugin.OutputPlugin):
                     #    ytext = max(y, y * (3-2*y/max_y))
                     # else:
                 else:
-                    ytext = max(y, y + (max_y - y) * (0.05 + 0.2 * random.random()))
-                    arrowprops = dict(arrowstyle="simple",
-                                      fc='black', ec="none", alpha=0.3,
-                                      connectionstyle="angle3,"
-                                                      "angleA=0,"
-                                                      "angleB=-90")
+                    #ytext = max(y, y + (max_y - y) * (0.05 + 0.2 * random.random()))
+                    #arrowprops = dict(arrowstyle="simple",
+                                      #fc='black', ec="none", alpha=0.3,
+                                      #connectionstyle="angle3,"
+                                                      #"angleA=0,"
+                                                      #"angleB=-90")
 
-                ax.annotate('%s:%0.1f' % (peak.type, peak.area),
-                            xy=(x, y),
-                            xytext=(x, ytext),
-                            fontsize=8,
-                            arrowprops=arrowprops,
-                            color='red' if peak.detector == 'veto' else 'black')
+                #ax.annotate('%s:%0.1f' % (peak.type, peak.area),
+                            #xy=(x, y),
+                            #xytext=(x, ytext),
+                            #fontsize=8,
+                            #arrowprops=arrowprops,
+                    color='red' if peak.detector == 'veto' else 'black'
 
         ax.set_ylim(y_min, y_max * 1.1)
+        #ax.set_ylim(0,6*10**3)
+        #ax.set_xlim(0,1350)
 
         if show_legend:
             legend = ax.legend(loc='upper left', prop={'size': 10})
@@ -279,6 +291,8 @@ class PlotBase(plugin.OutputPlugin):
     def color_peak_ranges(self, source, ax=None):
         if ax is None:
             ax = plt.gca()
+            ax.set_yticklabels([])
+            ax.set_xticklabels([])
         if isinstance(source, datastructure.Event):
             peaks = source.peaks
         else:
@@ -321,8 +335,10 @@ class PlotBase(plugin.OutputPlugin):
                     color={1: 'blue', 2: 'green', 3: 'orange'}.get(signal_type, 'gray'),
                     linewidth=0, alpha=0.5,
                     markersize=10 * size_factor)
+       
 
     def plot_hitpattern(self, peak, event, array='top', ax=None):
+        #plt.plot(0,0,'ro')
         if ax is None:
             ax = plt.gca()
         if self.config.get('show_all_pmts', True):
@@ -337,7 +353,8 @@ class PlotBase(plugin.OutputPlugin):
                        vmin=self.hitpattern_limits[0],
                        vmax=self.hitpattern_limits[1],
                        alpha=0.4,
-                       s=200)
+                       s=2150)
+        #ax.axis('off')
 
         # Plot position if it's an S2
         if peak.type == 's2':
@@ -347,8 +364,8 @@ class PlotBase(plugin.OutputPlugin):
                     y_peak = getattr(rp, 'y')
 
                     ax.plot([x_peak], [y_peak],
-                            marker='x', color='r', alpha=0.8, markersize=14, markeredgewidth=3)
-
+                            marker='x', color='r', alpha=0.8, markersize=25, markeredgewidth=3)
+                    #ax.axis('off')
         # Plot main S2 position if there is one
         if len(event.interactions) != 0:
             s2 = event.peaks[event.interactions[0].s2]
@@ -358,24 +375,27 @@ class PlotBase(plugin.OutputPlugin):
                     y_peak = getattr(rp, 'y')
 
                     ax.plot([x_peak], [y_peak],
-                            marker='x', color='orange', alpha=0.4, markersize=14, markeredgewidth=3)
+                            marker='x', color='orange', alpha=0.4, markersize=25, markeredgewidth=3)
 
         # Plot the PMT numbers
         for pmt in pmts_hit:
             ax.text(self.pmt_locations[pmt, 0], self.pmt_locations[pmt, 1], pmt,
-                    fontsize=8 if peak.is_channel_saturated[pmt] else 6,
+                    fontsize=0 if peak.is_channel_saturated[pmt] else 0,
                     va='center', ha='center',
                     color='white' if peak.is_channel_saturated[pmt] else 'black')
-
+            #ax.axis('off')
         # Plot the detector radius
         r = self.config['tpc_radius']
         ax.add_artist(plt.Circle((0, 0), r, edgecolor='black', fill=None))
+        ax.plot(0,0,'ro')
         ax.set_xlim(-1.2*r, 1.2*r)
         ax.set_ylim(-1.2*r, 1.2*r)
+
         # Sets labels on the hitpattern plot
         # 'labelpad' adjusts position
-        ax.set_xlabel('x (cm)', labelpad=1)
-        ax.set_ylabel('y (cm)', labelpad=1)
+        #ax.set_xlabel('x (cm)', labelpad=1)
+        #ax.set_ylabel('y (cm)', labelpad=1)
+        ax.axis('off')
 
         return q
 
@@ -386,13 +406,19 @@ class PlotSumWaveformMainS2(PlotBase):
         peak = event.main_s2
         if peak is None:
             self.log.debug("Can't plot the largest S2: there aren't any S2s in this event.")
-            plt.title('No S2 in event')
+            #plt.title('No S2 in event')
+            plt.ylim(0,10**2)
+            #plt.xticks([])
+            #plt.yticks([])
+            #plt.axis('off')
             return
 
-        self.plot_waveform(event, left=peak.left, right=peak.right, pad=200 if peak.height > 100 else 50,
-                           show_legend=show_legend, log_y_axis=self.config['log_scale_s2'])
-        plt.title("S2 at %.1f us" % (peak.index_of_maximum * self.samples_to_us))
-
+        self.plot_waveform(event, left=peak.left, right=peak.right, pad=200 if peak.height > 100 else 200,
+                           show_legend=show_legend, log_y_axis=True)
+        #plt.title("S2 at %.1f us" % (peak.index_of_maximum * self.samples_to_us))
+        plt.ylim(0,6*10**3)
+        #plt.xlim(0,30)
+        #plt.axis('off')
 
 class PlotSumWaveformMainS1(PlotBase):
 
@@ -400,26 +426,35 @@ class PlotSumWaveformMainS1(PlotBase):
         peak = event.main_s1
         if peak is None:
             self.log.debug("Can't plot the largest S1: there aren't any S1s in this event.")
-            plt.title('No S1 in event')
+            #plt.title('No S1 in event')
+            #plt.ylim(0,10**2)
+            #plt.axis('off')
             return
 
         self.plot_waveform(event, left=peak.left, right=peak.right, pad=10, show_legend=show_legend,
-                           log_y_axis=self.config['log_scale_s1'])
-        plt.title("S1 at %.1f us" % (peak.index_of_maximum * self.samples_to_us))
-
+                           log_y_axis=True)
+        #plt.title("S1 at %.1f us" % (peak.index_of_maximum * self.samples_to_us))
+        plt.ylim(0,6*10**3)
+        #plt.xlim(0,2)
+	    #plt.axis('off')
 
 class PlotSumWaveformEntireEvent(PlotBase):
 
     def plot_event(self, event, show_legend=True, ax=None):
-        self.plot_waveform(event, show_peaks=True, show_legend=show_legend,
-                           log_y_axis=self.config['log_scale_entire_event'], ax=ax)
-
+        self.plot_waveform(event, show_peaks=True, show_legend=show_legend, 
+                           log_y_axis=True, ax=ax)
+        plt.ylim(0,6*10**3)
+        plt.xlim(0,1350)
+        #plt.xticks([])
+        #plt.yticks([])
 
 class PlottingHitPattern(PlotBase):
 
     def plot_event(self, event, show=('S1', 'S2'), show_dominant_array_only=True, subplots_to_use=None):
+        #plt.xticks([])
+        #plt.yticks([])
         if subplots_to_use is None:
-            f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row')
+            f, ((ax1, ax2),(ax3,ax4)) = plt.subplots(2, 2, sharex='col', sharey='row',figsize = (15,15),dpi = 150)
             subplots_to_use = [ax1, ax2, ax3, ax4]
 
         for peak_type, dominant_array in (('S1', 'bottom'), ('S2', 'top')):
@@ -429,13 +464,13 @@ class PlottingHitPattern(PlotBase):
             if peak_list and len(peak_list) >= 1:
                 peak = peak_list[0]
                 for array in ('top', 'bottom'):
-                    if show_dominant_array_only and array != dominant_array:
+                    if show_dominant_array_only and array != dominant_array:                
                         continue
-                    ax = subplots_to_use.pop(0)
+                    ax =subplots_to_use.pop(0)
                     ax.set_title('%s %s' % (peak_type, array))
                     self.plot_hitpattern(peak=peak, event=event, array=array, ax=ax)
-
-
+                    ax.axis('off')
+                    
 class PlotChannelWaveforms3D(PlotBase):
 
     """Plot the waveform of several channels in 3D, with different y positions for all channels.
@@ -511,7 +546,7 @@ class PlotChannelWaveforms2D(PlotBase):
     Circle color indicates log(peak amplitude / noise amplitude), size indicates peak integral.
     """
 
-    def plot_event(self, source, ax=None, pad=0, event=None, show_channel_group_labels=True):
+    def plot_event(self, source, ax=None, pad=0, event=None, show_channel_group_labels=False):
         """Source can be Event or Peak, if peak, must also pass event"""
 
         dt = self.config['sample_duration']
@@ -616,21 +651,22 @@ class PlotEventSummary(PlotBase):
         Combines several plots into a nice summary plot
         """
 
-        rows = 3
-        cols = 4
+        rows = 1
+        cols = 2
         if not self.config['plot_largest_peaks']:
             rows -= 1
 
-        plt.figure(figsize=(self.horizontal_size_multiplier * self.size_multiplier * cols,
-                            self.size_multiplier * rows))
-
+        plt.figure(figsize=(self.horizontal_size_multiplier*self.size_multiplier*cols*3,
+                            self.size_multiplier * rows*3),dpi=150)
+        #plt.xticks([])
+        #plt.yticks([])
         # Show the title
         # If there is no trigger time, show the event start time in the title
-        title = 'Event %s from %s\nRecorded at %s UTC, %09d ns' % (
-            event.event_number, event.dataset_name,
-            epoch_to_human_time(self.trigger_time_ns),
-            self.trigger_time_ns % (units.s))
-        plt.suptitle(title, fontsize=18)
+        #title = '' #% (
+            #event.event_number, event.dataset_name,
+            #epoch_to_human_time(self.trigger_time_ns),
+            #self.trigger_time_ns % (units.s))
+        #plt.suptitle(title, fontsize=18)
 
         if self.config['plot_largest_peaks']:
 
@@ -638,33 +674,41 @@ class PlotEventSummary(PlotBase):
             plt.subplot2grid((rows, cols), (0, 0))
             q = PlotSumWaveformMainS1(self.config, self.processor)
             q.plot_event(event, show_legend=False)
+            plt.axis('off')
 
             self.log.debug("Plotting largest S2...")
             plt.subplot2grid((rows, cols), (0, 1))
             q = PlotSumWaveformMainS2(self.config, self.processor)
             q.plot_event(event, show_legend=False)
+            plt.axis('off')
+	
 
-            self.log.debug("Plotting hitpatterns...")
-            q = PlottingHitPattern(self.config, self.processor)
-            q.plot_event(event, show_dominant_array_only=True, subplots_to_use=[
-                plt.subplot2grid((rows, cols), (0, 2)),
-                plt.subplot2grid((rows, cols), (0, 3))
-            ])
+            #self.log.debug("Plotting hitpatterns...")
+            #q = PlottingHitPattern(self.config, self.processor)
+            #q.plot_event(event,show_dominant_array_only=True, subplots_to_use=[
+                #plt.subplot2grid((rows, cols), (0, 0)),
+                #plt.subplot2grid((rows, cols), (0, 1))
+            #])
+            #plt.xticks([])
+            #plt.yticks([])
+            #plt.axis('off')
 
-        self.log.debug("Plotting sum waveform...")
-        sumw_ax = plt.subplot2grid((rows, cols), (rows - 2, 0), colspan=cols)
-        q = PlotSumWaveformEntireEvent(self.config, self.processor)
-        q.plot_event(event, show_legend=True)
 
-        self.log.debug("Plotting channel waveforms...")
-        plt.subplot2grid((rows, cols), (rows - 1, 0), colspan=cols, sharex=sumw_ax)
-        q = PlotChannelWaveforms2D(self.config, self.processor)
-        q.plot_event(event)
+        #self.log.debug("Plotting sum waveform...")
+        #sumw_ax = plt.subplot2grid((rows, cols), (rows -1 , 0), colspan=cols)
+        #q = PlotSumWaveformEntireEvent(self.config, self.processor)
+        #q.plot_event(event, show_legend=False)
+
+        #self.log.debug("Plotting channel waveforms...")
+        #plt.subplot2grid((rows, cols), (rows - 1, 0), colspan=cols, sharex=sumw_ax)
+        #q = PlotChannelWaveforms2D(self.config, self.processor)
+        #q.plot_event(event)
 
         # Make some room for the title: need to call tight_layout first...
         plt.tight_layout()
-        plt.subplots_adjust(top=1 - 0.12 * 4 / self.size_multiplier)
-
+        plt.subplots_adjust(top=1-0.05)#-0.08) #- 0.12 * 4 / self.size_multiplier)
+        #plt.xticks([])
+        #plt.yticks([])
 
 class PeakViewer(PlotBase):
     block_view = True
@@ -696,8 +740,8 @@ class PeakViewer(PlotBase):
         row_y = full_y / 4
         column_x = full_y / 4
 
-        title = 'Event %s from %s' % (event.event_number, event.dataset_name)
-        plt.suptitle(title, fontsize=16, horizontalalignment='right', x=0.99)
+        #title = 'Event %s from %s' % (event.event_number, event.dataset_name)
+        #plt.suptitle(title, fontsize=16, horizontalalignment='right', x=0.99)
 
         ##
         # Channel waveforms plot
@@ -747,9 +791,9 @@ class PeakViewer(PlotBase):
         ##
         y = start_y + 2 * row_y + y_sep_middle
         self.bot_hitp_ax = plt.axes([start_x, y, column_x, row_y])
-        self.top_hitp_ax = plt.axes([start_x, y + row_y, column_x, row_y],
-                                    sharex=self.bot_hitp_ax)
-        self.top_hitp_ax.get_xaxis().set_visible(False)
+        self.top_hitp_ax = plt.axes([start_x, y + row_y, column_x, row_y])
+                                    #sharex=self.bot_hitp_ax)
+        self.top_hitp_ax.get_xaxis().set_visible(True)
 
         ##
         # Get the TPC peaks
@@ -852,6 +896,8 @@ class PeakViewer(PlotBase):
         self.bot_hitp_ax.cla()
         self.top_hitp_sc = self.plot_hitpattern(peak=peak, event=self.event, ax=self.top_hitp_ax, array='top')
         self.bot_hitp_sc = self.plot_hitpattern(peak=peak, event=self.event, ax=self.bot_hitp_ax, array='bottom')
+        plt.xticks([])
+        plt.yticks([])
 
         # Update peak waveforms
         peak_padding = self.config.get('peak_padding_samples', 30)
