@@ -90,7 +90,7 @@ class PlotBase(plugin.OutputPlugin):
         if not self.hates_tight_layout:
             plt.tight_layout()
         if self.output_dir:
-            filename = self.output_dir + '/%06d_%06d' % (self.config['run_number'], event_number)
+            filename = self.output_dir + '%06d_%06d' % (self.config['run_number'], event_number)
             if self.config['plot_format'] == 'pdf':
                 plt.savefig(filename + '.pdf', format='pdf')
             elif self.config['plot_format'] == 'pickle':
@@ -100,7 +100,7 @@ class PlotBase(plugin.OutputPlugin):
                 plt.savefig(filename + '.png')
         else:
             #filedir = os.mkdir('/home/joel/Documents/XENON-ML/Figures/' +'X1T_Dummy_Waveform')
-            filename = '/home/joel/Documents/XENON-ML/Figures/'+'/%06d_%06d' % (self.config['run_number'], event_number)
+            filename = '%06d_%06d' % (self.config['run_number'], event_number)
             plt.savefig(filename + 'png') #self.log.info("Hit enter to continue...")#plt.show(block=self.block_view)
             #if not self.block_view:
                 #for event_number in range (self.config['run_number']): #if not self.block_view:
